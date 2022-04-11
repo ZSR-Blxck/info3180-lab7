@@ -18,6 +18,38 @@ import os
 def index():
     return jsonify(message="This is the beginning of our API")
 
+@app.route('/upload', methods=['POST'])
+def upload():
+    if not session.get('logged_in'):
+        abort(401)
+
+    # Instantiate your form class
+
+    _form = UploadForm()
+
+    # Validate file upload on submit
+    if request.method == 'POST':
+        if _form.validate_on_submit():
+
+        # Get file data and save to your uploads folder
+
+            photo = _form.photo.data
+
+            file_name = secure_filename(photo.filename)
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+
+            localStorage.msg= JSON.stringify{
+                "message":"File Upload Successful"
+                "filename":file_name
+                "description":"Some description for your image"
+
+            }
+            JSON.parse(localStorage.msg)
+            return redirect(url_for('home'))
+        else:
+            form_errors()
+
+    return render_template('upload.html',form=_form)
 
 ###
 # The functions below should be applicable to all Flask apps.
